@@ -113,13 +113,9 @@ class _NewTaskScreenState extends State<NewTaskScreen> {
     );
   }
 
-  bool _checkDataLength() {
-    return false;
-  }
-
   Widget taskCounterSection(List<TaskByStatusData>? listOfTaskByStatusData) {
     return SizedBox(
-      height: 110,
+      height: 120,
       child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: ListView.separated(

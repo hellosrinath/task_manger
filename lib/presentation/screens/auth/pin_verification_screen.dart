@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:task_manger/data/services/network_caller.dart';
 import 'package:task_manger/data/utils/urls.dart';
+import 'package:task_manger/presentation/controller/pin_verification_controller.dart';
 import 'package:task_manger/presentation/screens/auth/set_password_screen.dart';
 import 'package:task_manger/presentation/screens/auth/signin_screen.dart';
 import 'package:task_manger/presentation/utils/app_colors.dart';
@@ -18,7 +20,6 @@ class PinVerificationScreen extends StatefulWidget {
 }
 
 class _PinVerificationScreenState extends State<PinVerificationScreen> {
-  bool _pinVerificationInProgress = false;
   final TextEditingController _pinTEController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
@@ -77,25 +78,29 @@ class _PinVerificationScreenState extends State<PinVerificationScreen> {
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
-                  child: Visibility(
-                    visible: _pinVerificationInProgress == false,
-                    replacement: const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          _verifyOtpCode();
-                        }
-                        /*Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const SetPasswordScreen(),
-                          ),
-                        );*/
-                      },
-                      child: const Text("Verify"),
-                    ),
+                  child: GetBuilder<PinVerificationController>(
+                    builder: (pinVerificationController) {
+                      return Visibility(
+                        visible: pinVerificationController.inProgress == false,
+                        replacement: const Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            if (_formKey.currentState!.validate()) {
+                              _verifyOtpCode();
+                            }
+                            /*Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const SetPasswordScreen(),
+                              ),
+                            );*/
+                          },
+                          child: const Text("Verify"),
+                        ),
+                      );
+                    }
                   ),
                 ),
                 const SizedBox(height: 35),
@@ -139,17 +144,11 @@ class _PinVerificationScreenState extends State<PinVerificationScreen> {
   }
 
   Future<void> _verifyOtpCode() async {
-    _pinVerificationInProgress = true;
-    setState(() {});
-
-    final response = await NetworkCaller.getRequest(
-        Urls.verifyOtpCode(widget.email, _pinTEController.text.trim()));
-
-    _pinVerificationInProgress = false;
-    setState(() {});
+    final result = await Get.find<PinVerificationController>()
+        .verifyOtpCode(widget.email, _pinTEController.text.trim());
 
     if (!mounted) return;
-    if (response.isSuccess && response.responseBody['status'] == "success") {
+    if (result) {
       //{"status":"success",
       showSnackBarMessage(context, "Success verify pin");
       Navigator.push(

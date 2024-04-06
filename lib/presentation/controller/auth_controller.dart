@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:math';
 
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:task_manger/data/models/user_data.dart';
@@ -31,6 +30,7 @@ class AuthController {
     await sharedPreferences.setString("token", token);
     accessToken = token;
   }
+
 
   static Future<String?> getUserToken() async {
     SharedPreferences sharedPreferences = await SharedPreferences.getInstance();

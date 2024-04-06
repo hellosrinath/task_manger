@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:task_manger/app.dart';
 import 'package:task_manger/presentation/controller/auth_controller.dart';
 import 'package:task_manger/presentation/screens/auth/signin_screen.dart';
@@ -9,6 +11,14 @@ import 'package:task_manger/presentation/screens/update_profile_screen.dart';
 import '../utils/app_colors.dart';
 
 PreferredSizeWidget get profileAppBar {
+  Uint8List img;
+
+  try {
+    img = base64Decode(AuthController.userData!.photo!);
+  } catch (e) {
+    img = base64Decode("");
+  }
+
   return AppBar(
     automaticallyImplyLeading: false,
     backgroundColor: AppColors.themeColor,
@@ -24,8 +34,7 @@ PreferredSizeWidget get profileAppBar {
       child: Row(
         children: [
           CircleAvatar(
-            backgroundImage:
-                MemoryImage(base64Decode(AuthController.userData?.photo ?? "")),
+            backgroundImage: MemoryImage(img),
           ),
           const SizedBox(width: 8),
           Expanded(
@@ -53,6 +62,8 @@ PreferredSizeWidget get profileAppBar {
           IconButton(
               onPressed: () async {
                 await AuthController.clearUserData();
+
+            /*    Get.offAll(() => const SignInScreen());*/
 
                 Navigator.pushAndRemoveUntil(
                     TaskManager.navigatorKey.currentState!.context,

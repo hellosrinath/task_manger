@@ -1,10 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:task_manger/data/models/login_response.dart';
-import 'package:task_manger/data/models/response_object.dart';
-import 'package:task_manger/data/services/network_caller.dart';
-import 'package:task_manger/data/utils/urls.dart';
-import 'package:task_manger/presentation/controller/auth_controller.dart';
 import 'package:task_manger/presentation/controller/sign_in_controller.dart';
 import 'package:task_manger/presentation/screens/main_bottom_nav_screen.dart';
 import 'package:task_manger/presentation/screens/auth/email_verification_screen.dart';
@@ -23,7 +18,6 @@ class _SignInScreenState extends State<SignInScreen> {
   final TextEditingController _emailTEController = TextEditingController();
   final TextEditingController _passwordTEController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  bool _isSignInProgress = false;
   final SignInController _signInController = Get.find<SignInController>();
 
   @override

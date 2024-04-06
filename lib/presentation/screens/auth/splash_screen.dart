@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:task_manger/presentation/screens/auth/signin_screen.dart';
 import 'package:task_manger/presentation/screens/main_bottom_nav_screen.dart';
 import 'package:task_manger/presentation/widgets/main_background.dart';
@@ -27,6 +28,8 @@ class _SplashScreenState extends State<SplashScreen> {
 
     if (mounted) {
       if (userExist) {
+
+     /*   Get.off(() => const MainBottomNavScreen());*/
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -34,6 +37,7 @@ class _SplashScreenState extends State<SplashScreen> {
           ),
         );
       } else {
+       /* Get.off(() => const SignInScreen());*/
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(

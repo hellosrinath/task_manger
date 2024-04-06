@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:task_manger/data/models/response_object.dart';
 import 'package:task_manger/data/services/network_caller.dart';
 import 'package:task_manger/data/utils/urls.dart';
+import 'package:task_manger/presentation/controller/sign_up_controller.dart';
 import 'package:task_manger/presentation/widgets/main_background.dart';
 import 'package:task_manger/presentation/widgets/snackbar_message.dart';
 
@@ -19,7 +21,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController _mobileTEController = TextEditingController();
   final TextEditingController _passwordTEController = TextEditingController();
   final GlobalKey<FormState> _key = GlobalKey<FormState>();
-  bool _isSignInProgress = false;
 
   @override
   Widget build(BuildContext context) {
@@ -113,19 +114,23 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   const SizedBox(height: 16),
                   SizedBox(
                     width: double.infinity,
-                    child: Visibility(
-                      visible: _isSignInProgress == false,
-                      replacement: const Center(
-                        child: CircularProgressIndicator(),
-                      ),
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          if (_key.currentState!.validate()) {
-                            await _signUp(context);
-                          }
-                        },
-                        child: const Icon(Icons.arrow_circle_right_outlined),
-                      ),
+                    child: GetBuilder<SignUpController>(
+                      builder: (signUpController) {
+                        return Visibility(
+                          visible: signUpController.inProgress == false,
+                          replacement: const Center(
+                            child: CircularProgressIndicator(),
+                          ),
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              if (_key.currentState!.validate()) {
+                                await _signUp(context);
+                              }
+                            },
+                            child: const Icon(Icons.arrow_circle_right_outlined),
+                          ),
+                        );
+                      }
                     ),
                   ),
                   const SizedBox(height: 45),
@@ -159,28 +164,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Future<void> _signUp(BuildContext context) async {
-    _isSignInProgress = true;
-    setState(() {});
+    final result = await Get.find<SignUpController>().signUp(
+      _emailTEController.text.trim(),
+      _fNameTEController.text.trim(),
+      _lNameTEController.text.trim(),
+      _mobileTEController.text.trim(),
+      _passwordTEController.text,
+    );
 
-    Map<String, dynamic> postParam = {
-      "email": _emailTEController.text.trim(),
-      "firstName": _fNameTEController.text.trim(),
-      "lastName": _lNameTEController.text.trim(),
-      "mobile": _mobileTEController.text.trim(),
-      "password": _passwordTEController.text,
-    };
-
-    final ResponseObject response =
-        await NetworkCaller.postRequest(
-            Urls.registration, postParam);
-
-    _isSignInProgress = false;
-    setState(() {});
-
-    if (response.isSuccess) {
+    if (result) {
       if (context.mounted) {
-        showSnackBarMessage(context,
-            'Registration Success. Please login');
+        showSnackBarMessage(context, 'Registration Success. Please login');
         Navigator.pop(context);
       }
     } else {

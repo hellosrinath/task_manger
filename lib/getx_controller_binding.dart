@@ -3,8 +3,12 @@ import 'package:task_manger/presentation/controller/add_new_task_controller.dart
 import 'package:task_manger/presentation/controller/cancelled_task_controller.dart';
 import 'package:task_manger/presentation/controller/completed_task_controller.dart';
 import 'package:task_manger/presentation/controller/new_task_controller.dart';
+import 'package:task_manger/presentation/controller/pin_verification_controller.dart';
 import 'package:task_manger/presentation/controller/progress_task_controller.dart';
+import 'package:task_manger/presentation/controller/recover_password_controller.dart';
+import 'package:task_manger/presentation/controller/send_otp_controller.dart';
 import 'package:task_manger/presentation/controller/sign_in_controller.dart';
+import 'package:task_manger/presentation/controller/sign_up_controller.dart';
 import 'package:task_manger/presentation/controller/task_count_by_status_controller.dart';
 
 class GetXControllerBinding extends Bindings {
@@ -18,5 +22,9 @@ class GetXControllerBinding extends Bindings {
     Get.lazyPut(() => CancelledTaskController());
     Get.lazyPut(() => CancelledTaskController());
     Get.lazyPut(() => AddNewTaskController());
+    Get.lazyPut(() => SignUpController());
+    Get.lazyPut(() => SendOtpCodeController());
+    Get.lazyPut(() => PinVerificationController());
+    Get.lazyPut(() => RecoverPasswordController());
   }
 }

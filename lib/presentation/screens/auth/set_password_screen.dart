@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:task_manger/data/services/network_caller.dart';
 import 'package:task_manger/data/utils/urls.dart';
+import 'package:task_manger/presentation/controller/recover_password_controller.dart';
 import 'package:task_manger/presentation/screens/auth/signin_screen.dart';
 import 'package:task_manger/presentation/widgets/main_background.dart';
 import 'package:task_manger/presentation/widgets/snackbar_message.dart';
@@ -20,7 +22,6 @@ class SetPasswordScreen extends StatefulWidget {
 }
 
 class _SetPasswordScreenState extends State<SetPasswordScreen> {
-  bool _recoverPasswordInProgress = false;
   final TextEditingController _passwordTEController = TextEditingController();
   final TextEditingController _confirmPasswordTEController =
       TextEditingController();
@@ -80,32 +81,35 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
-                  child: Visibility(
-                    visible: _recoverPasswordInProgress == false,
-                    replacement: const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          if (_passwordTEController.text ==
-                              _confirmPasswordTEController.text) {
-                            _recoverPassword();
-                          } else {
-                            showSnackBarMessage(
-                                context, 'Password not match', true);
+                  child: GetBuilder<RecoverPasswordController>(
+                      builder: (controller) {
+                    return Visibility(
+                      visible: controller.inProgress == false,
+                      replacement: const Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            if (_passwordTEController.text ==
+                                _confirmPasswordTEController.text) {
+                              _recoverPassword();
+                            } else {
+                              showSnackBarMessage(
+                                  context, 'Password not match', true);
+                            }
                           }
-                        }
-                        /*Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const PinVerificationScreen(),
-                          ),
-                        );*/
-                      },
-                      child: const Icon(Icons.arrow_circle_right_outlined),
-                    ),
-                  ),
+                          /*Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const PinVerificationScreen(),
+                              ),
+                            );*/
+                        },
+                        child: const Icon(Icons.arrow_circle_right_outlined),
+                      ),
+                    );
+                  }),
                 ),
                 const SizedBox(height: 35),
                 Row(
@@ -149,23 +153,14 @@ class _SetPasswordScreenState extends State<SetPasswordScreen> {
   }
 
   Future<void> _recoverPassword() async {
-    _recoverPasswordInProgress = true;
-    setState(() {});
-
-    Map<String, dynamic> postParam = {
-      "email": widget.email,
-      "OTP": widget.otp,
-      "password": _passwordTEController.text,
-    };
-
-    final response =
-        await NetworkCaller.postRequest(Urls.recoverPassword, postParam);
-
-    _recoverPasswordInProgress = false;
-    setState(() {});
+    final result = await Get.find<RecoverPasswordController>().recoverPassword(
+      widget.email,
+      widget.otp,
+      _passwordTEController.text,
+    );
 
     if (!mounted) return;
-    if (response.isSuccess && response.responseBody['status'] == "success") {
+    if (result) {
       showSnackBarMessage(context,
           "Password update successfully. Try Sign In with new password");
     } else {
