@@ -1,12 +1,11 @@
-import 'dart:developer';
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:task_manger/data/models/login_response.dart';
 import 'package:task_manger/data/models/response_object.dart';
 import 'package:task_manger/data/services/network_caller.dart';
 import 'package:task_manger/data/utils/urls.dart';
 import 'package:task_manger/presentation/controller/auth_controller.dart';
+import 'package:task_manger/presentation/controller/sign_in_controller.dart';
 import 'package:task_manger/presentation/screens/main_bottom_nav_screen.dart';
 import 'package:task_manger/presentation/screens/auth/email_verification_screen.dart';
 import 'package:task_manger/presentation/screens/auth/signup_screen.dart';
@@ -25,6 +24,7 @@ class _SignInScreenState extends State<SignInScreen> {
   final TextEditingController _passwordTEController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isSignInProgress = false;
+  final SignInController _signInController = Get.find<SignInController>();
 
   @override
   Widget build(BuildContext context) {
@@ -73,20 +73,23 @@ class _SignInScreenState extends State<SignInScreen> {
                 const SizedBox(height: 16),
                 SizedBox(
                   width: double.infinity,
-                  child: Visibility(
-                    visible: _isSignInProgress == false,
-                    replacement: const Center(
-                      child: CircularProgressIndicator(),
-                    ),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          _signIn();
-                        }
-                      },
-                      child: const Icon(Icons.arrow_circle_right_outlined),
-                    ),
-                  ),
+                  child:
+                      GetBuilder<SignInController>(builder: (signInController) {
+                    return Visibility(
+                      visible: signInController.inProgress == false,
+                      replacement: const Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            _signIn();
+                          }
+                        },
+                        child: const Icon(Icons.arrow_circle_right_outlined),
+                      ),
+                    );
+                  }),
                 ),
                 const SizedBox(height: 45),
                 Center(
@@ -142,44 +145,28 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 
   Future<void> _signIn() async {
-    _isSignInProgress = true;
-    setState(() {});
-
-    Map<String, dynamic> postParam = {
-      "email": _emailTEController.text.trim(),
-      "password": _passwordTEController.text
-    };
-
-    final ResponseObject response = await NetworkCaller.postRequest(
-      Urls.login,
-      postParam,
-      fromSignIn: true,
+    final result = await _signInController.signIn(
+      _emailTEController.text.trim(),
+      _passwordTEController.text,
     );
-
-    _isSignInProgress = false;
-    setState(() {});
 
     if (!mounted) return;
 
-    if (response.isSuccess) {
-      LoginResponse loginResponse =
-          LoginResponse.fromJson(response.responseBody);
-      // save data to local db
-      await AuthController.saveUserData(loginResponse.data!);
-      await AuthController.saveUserToken(loginResponse.token!);
-
+    if (result) {
       if (mounted) {
         Navigator.pushAndRemoveUntil(
             context,
             MaterialPageRoute(
               builder: (context) => const MainBottomNavScreen(),
             ),
-                (route) => false);
+            (route) => false);
       }
-
     } else {
       showSnackBarMessage(
-          context, response.errorMsg ?? 'Login Failed. Please try again', true);
+        context,
+        _signInController.errorMessage,
+        true,
+      );
     }
   }
 
